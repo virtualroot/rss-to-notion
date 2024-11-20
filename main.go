@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -51,7 +52,14 @@ func main() {
 	case "help":
 		printUsage()
 	case "run":
-		runSync()
+		runCmd := flag.NewFlagSet("run", flag.ExitOnError)
+		configFile := runCmd.String("config", "feeds.yaml", "path to config file")
+
+		if err := runCmd.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("Error parsing flags: %v", err)
+		}
+
+		runSync(*configFile)
 	default:
 		fmt.Printf("Unknown command: %s\n", os.Args[1])
 		printUsage()
@@ -63,14 +71,16 @@ func printUsage() {
 	fmt.Printf(`RSS to Notion Sync Tool
 
 Usage:
-  %s <command>
+  %s <command> [flags]
 
 Commands:
   run   Execute the RSS to Notion synchronization
+        Flags:
+          -config string    Path to config file (default "feeds.yaml")
   help  Show this help message
 
 Configuration:
-  Create a feeds.yaml file with the following structure:
+  Create a YAML config file with the following structure:
     feeds:
       - https://example.com/feed.xml
     notion_db_id: your_notion_database_id
@@ -78,8 +88,8 @@ Configuration:
 `, os.Args[0])
 }
 
-func runSync() {
-	config, err := loadConfig("feeds.yaml")
+func runSync(configFile string) {
+	config, err := loadConfig(configFile)
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
