@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feeds
+data:
+  feeds.yaml: |
+    notion_api_key: ""
+    notion_db_id: ""
+    feeds:
+      - https://example.com/blog.rss
+      - https://example.org/feed.atom
+      - https://blog.example.net/feed.xml
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rss-to-notion-sync
+spec:
+  schedule: "12 3 * * *"  # Run once per day at 3:12am
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: rss-to-notion-sync
+            image: TBD # TODO: replace with actual image
+            volumeMounts:
+            - name: feeds-volume
+              mountPath: /app/feeds.yaml
+              subPath: feeds.yaml
+            command: ["/app/rss-to-notion"]
+          volumes:
+          - name: feeds-volume
+            configMap:
+              name: feeds
+          restartPolicy: OnFailure
