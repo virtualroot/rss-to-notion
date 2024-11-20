@@ -1,0 +1,9 @@
+# Notion configuration
+notion_api_key: ""
+notion_db_id: ""
+
+# List of RSS/Atom feeds to fetch
+feeds:
+  - https://example.com/blog.rss
+  - https://example.org/feed.atom
+  - https://blog.example.net/feed.xml
